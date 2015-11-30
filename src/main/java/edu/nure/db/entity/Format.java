@@ -1,15 +1,8 @@
 package edu.nure.db.entity;
 
-import edu.nure.db.Connector;
-import edu.nure.db.RequestPreparing;
 import edu.nure.db.entity.constraints.MoreOrEq;
 import edu.nure.db.entity.constraints.ValidationException;
 import edu.nure.db.entity.constraints.Validator;
-
-import javax.servlet.http.HttpServletRequest;
-import java.net.ConnectException;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 
 /**
  * Created by bod on 17.09.15.
@@ -30,22 +23,8 @@ public class Format implements Transmittable {
         }
     }
 
-    public Format(ResultSet rs) throws SQLException, ValidationException {
-        setName(rs.getString("Name"));
-        setHeight(rs.getInt("Height"));
-        setWidth(rs.getInt("Width"));
-        setPrice(rs.getFloat("Price"));
-    }
-
-    public Format(HttpServletRequest req) throws ValidationException {
-        setName(req.getParameter("name"));
-        try {
-            setHeight(Integer.valueOf(req.getParameter("height")));
-            setWidth(Integer.valueOf(req.getParameter("width")));
-            setPrice(Float.valueOf(req.getParameter("price")));
-        }catch (NumberFormatException ex){
-            throw new ValidationException();
-        }
+    public static String[] getFields() {
+        return new String[]{"Name", "Width", "Height", "Price"};
     }
 
     public String getName() {
@@ -80,7 +59,6 @@ public class Format implements Transmittable {
         this.price = (Float)Validator.validate(price, new MoreOrEq<Float>(0.0f));
     }
 
-
     @Override
     public String toXML() {
         return "<format name=\""+name.replace('"','\'')+"\" "+
@@ -95,14 +73,5 @@ public class Format implements Transmittable {
                 "&width=" + width +
                 "&height=" + height +
                 "&price=" + price;
-    }
-
-    public static Format getFormatByName(String name)throws ConnectException, SQLException, ValidationException{
-        ResultSet rs = Connector.getConnector().getConnection().createStatement().
-                executeQuery(RequestPreparing.select("format", new String[]{"*"}, "WHERE Name = '" + name+"'"));
-        return new Format(rs);
-    }
-    public static String[] getFields() {
-        return new String[]{"Name", "Width", "Height", "Price"};
     }
 }
