@@ -71,7 +71,6 @@ public class SuggestionComboBox extends JComboBox<AbstractSuggestionContainer>{
     }
 
     private AbstractSuggestionContainer getContainer(String text){
-        System.out.println(text);
         for (int i = 0; i < getModel().getSize(); i++) {
             if(getModel().getElementAt(i).toString().equals(text)) {
                 return getModel().getElementAt(i);
@@ -158,7 +157,7 @@ public class SuggestionComboBox extends JComboBox<AbstractSuggestionContainer>{
         DefaultComboBoxModel<AbstractSuggestionContainer> m = new DefaultComboBoxModel<AbstractSuggestionContainer>();
         for (AbstractSuggestionContainer value : list) {
             if (value.getString().toLowerCase().contains(text.toLowerCase().trim())) {
-                System.out.println(value.getString());
+                ;
                 m.addElement(value);
             }
         }

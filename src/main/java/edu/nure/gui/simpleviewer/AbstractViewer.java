@@ -19,28 +19,20 @@ import javax.swing.event.ListSelectionListener;
 import java.awt.*;
 import java.awt.event.*;
 import java.lang.reflect.Field;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 abstract public class AbstractViewer extends JDialog {
-    private JPanel contentPane;
-    private JButton buttonOK;
     protected JButton buttonCancel;
     protected JButton saveButton;
-    private JList<AbstractContainer> itemList;
     protected DefaultListModel<AbstractContainer> model;
-    private JButton deleteButton;
-    private JSplitPane splitPane;
-    private JPanel viewContent;
     protected AbstractContainer curEntity;
     protected Transmittable oldValue;
     protected int getAct, insAct, updAct, delAct;
-
+    private JPanel contentPane;
+    private JButton buttonOK;
+    private JList<AbstractContainer> itemList;
+    private JButton deleteButton;
+    private JSplitPane splitPane;
+    private JPanel viewContent;
     private boolean readOnly = false;
 
     public AbstractViewer(String entityName) {
@@ -113,11 +105,6 @@ abstract public class AbstractViewer extends JDialog {
                 UserDescription.getWindow().getHeight()));
         splitPane.setResizeWeight(0.5);
         curEntity = new NewItemContainer();
-    }
-
-    public AbstractViewer setReadOnly(boolean r){
-        readOnly = r;
-        return this;
     }
 
     private void createUIComponents() {
@@ -250,7 +237,6 @@ abstract public class AbstractViewer extends JDialog {
             public void doDelete(DBResult result) {
                 for (int i = 0; i < model.getSize(); i++) {
                     if (model.getElementAt(i).getEntity() == oldValue) {
-                        System.out.println("accepted");
                         model.removeElementAt(i);
                     }
                 }
@@ -289,6 +275,11 @@ abstract public class AbstractViewer extends JDialog {
 
     public boolean isReadOnly(){
         return readOnly;
+    }
+
+    public AbstractViewer setReadOnly(boolean r) {
+        readOnly = r;
+        return this;
     }
 
     /*

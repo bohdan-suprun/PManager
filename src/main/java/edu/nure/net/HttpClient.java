@@ -82,8 +82,6 @@ class HttpClient extends Thread{
         try {
             while (true) {
                 SimpleRequest request = pool.take();
-                System.out.println(pool.size());
-                System.out.println(request.getRequest().toString());
                 send(request);
             }
         } catch (InterruptedException ex){

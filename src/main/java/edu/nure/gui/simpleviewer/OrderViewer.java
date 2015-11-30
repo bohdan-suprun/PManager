@@ -33,14 +33,14 @@ import java.util.concurrent.CountDownLatch;
  * Created by bod on 09.10.15.
  */
 public class OrderViewer extends AbstractViewer {
-    protected User owner;
-    private JButton tasks;
     private static OrderViewer self;
-    private JLabel customer;
+    protected User owner;
     protected SuggestionComboBox responsible;
+    protected JLabel titlePlayerFirst, titlePlayerSecond;
+    private JButton tasks;
+    private JLabel customer;
     private SuggestionComboBox urg;
     private JLabel term;
-    protected JLabel titlePlayerFirst, titlePlayerSecond;
     private JLabel price;
     private JTextField descPane;
     private JCheckBox active;
@@ -103,7 +103,6 @@ public class OrderViewer extends AbstractViewer {
             @Override
             public void currentIndexChanged(AbstractSuggestionContainer container) {
                 Urgency u = (Urgency)container.getEntity();
-                System.out.println(u.toXML());
                 Date start;
                 int delta = 0;
                 if (curEntity instanceof NewItemContainer) {
@@ -194,7 +193,6 @@ public class OrderViewer extends AbstractViewer {
             public void onUrgency(DBSelectResult res) {
                 ResultItem[] items = res.getResult();
                 for(ResultItem item: items) {
-                    System.out.println("----"+item.getEntity());
                     box.addElement(new UrgencyContainer(item.getEntity()));
                     Urgency u = (Urgency)item.getEntity();
                     urgencies.put(u.getTerm(), u);
@@ -282,7 +280,6 @@ public class OrderViewer extends AbstractViewer {
         Order o = (Order)curEntity.getEntity();
         loadUser(o.getResponsible());
         loadUrgency(o.getUrgency());
-        System.out.println(o.getUrgency());
         price.setText(""+o.getForPay());
         active.setSelected(o.getStatus() == 1);
         descPane.setText((o.getDesc() == null)?"":o.getDesc());

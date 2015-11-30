@@ -31,7 +31,6 @@ public class AlbumPanel extends JPanel {
 
     private void repaintModel(){
         removeAll();
-        System.out.println("size - "+model.size()+" "+model.getAlbumName().getName()+this);
         synchronized (model) {
             for (int i = 0; i < model.size(); i++) {
                 add(new PreviewImageLabel(model.get(i), previewClicked));
@@ -48,13 +47,7 @@ public class AlbumPanel extends JPanel {
         return model;
     }
 
-    public JScrollPane getScrolled(){
-        JScrollPane pane = new JScrollPane(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-        pane.setViewportView(this);
-        return pane;
-    }
-
-    public void setModel(ImageModel m){
+    public void setModel(ImageModel m) {
         this.model = m;
         this.model.addListener(new ModelChanged() {
             @Override
@@ -63,6 +56,12 @@ public class AlbumPanel extends JPanel {
             }
         });
         repaintModel();
+    }
+
+    public JScrollPane getScrolled(){
+        JScrollPane pane = new JScrollPane(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        pane.setViewportView(this);
+        return pane;
     }
 
 }

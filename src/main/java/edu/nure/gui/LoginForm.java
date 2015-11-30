@@ -91,7 +91,6 @@ public class LoginForm extends JFrame {
         String password = String.valueOf(pass);
         try {
             byte[] p = MessageDigest.getInstance("MD5").digest(password.getBytes());
-            System.out.println(toHex(p));
             return toHex(p);
         } catch (NoSuchAlgorithmException e) {
             return "non";

@@ -23,14 +23,13 @@ public class PreviewImageLabel extends JLabel{
         setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
     }
 
+    public Image getImage() {
+        return image;
+    }
+
     public void setImage(Image image) {
         this.image = image;
         loadImage();
-    }
-
-
-    public Image getImage(){
-        return image;
     }
 
     private void loadImage(){
@@ -53,7 +52,6 @@ public class PreviewImageLabel extends JLabel{
 
             @Override
             public void doBinaryImage(byte[] im) {
-                System.out.println("Loaded image");
                 image.setImage(im);
                 showImage();
             }

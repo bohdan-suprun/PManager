@@ -117,7 +117,6 @@ public class AlbumModel{
             @Override
             public void doInsert(DBSelectResult result) {
                 onAlbum(result);
-                System.out.println("--"+result.getResult()[0].getEntity().toXML());
             }
 
             @Override
@@ -138,10 +137,11 @@ public class AlbumModel{
         return model.get(index);
     }
 
-    public void setOwner(User u){
-        owner = u;
-    }
     public User getOwner() {
         return owner;
+    }
+
+    public void setOwner(User u){
+        owner = u;
     }
 }

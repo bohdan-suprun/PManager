@@ -5,7 +5,8 @@ import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.math.BigInteger;
 
 /**
@@ -91,13 +92,5 @@ public class PHash {
                 hash.append((matrix[i][j] >= avg) ? '1' : '0');
             }
         return new BigInteger(hash.toString(),2).toString(16);
-    }
-    public static void main(String[] args) throws FileNotFoundException, IOException {
-        File f = new File("src/main/resources/test.jpg");
-        FileInputStream in = new FileInputStream(f);
-        byte[] bu = new byte[in.available()];
-        in.read(bu);
-        System.out.println(hash(bu));
-
     }
 }

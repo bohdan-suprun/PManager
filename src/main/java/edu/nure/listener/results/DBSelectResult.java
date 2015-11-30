@@ -26,14 +26,12 @@ public class DBSelectResult extends DBResult {
         try {
             String pack = "edu.nure.db.entity.";
             tagName = pack + String.valueOf(tagName.charAt(0)).toUpperCase() + tagName.substring(1);
-            System.out.println(tagName);
             Class clazz = Class.forName(tagName);
             String[] classNames = {"User", "Format", "Image", "Order", "Right", "Stock", "Urgency", "Album"};
             for(String classCase: classNames){
                 if(clazz.getName().equals(pack + classCase)){
                     Method method = this.getClass().getDeclaredMethod("make" + classCase, pairs.getClass());
                     method.setAccessible(true);
-                    System.out.println(method.getName());
                     result.add(new ResultItem(clazz, (Transmittable) method.invoke(this, pairs)));
                 }
             }

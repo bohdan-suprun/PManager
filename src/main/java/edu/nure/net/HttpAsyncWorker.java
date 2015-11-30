@@ -17,10 +17,10 @@ import java.util.concurrent.PriorityBlockingQueue;
  * Created by bod on 01.10.15.
  */
 class HttpAsyncWorker extends Thread {
+    int cnt = 0;
     private CloseableHttpAsyncClient httpClient;
     private BasicCookieStore cookieStore;
     private PriorityBlockingQueue<SimpleRequest> requests;
-    int cnt = 0;
 
     HttpAsyncWorker(BasicCookieStore store){
         super();
@@ -47,13 +47,10 @@ class HttpAsyncWorker extends Thread {
     }
 
     private void send(final SimpleRequest request){
-        cnt++;
-        System.out.println(cnt);
         httpClient.execute(request.getRequest(), new FutureCallback<HttpResponse>() {
             @Override
             public void completed(HttpResponse httpResponse) {
                 try {
-                    cnt--;
                         byte[] buffer = new byte[httpResponse.getEntity().getContent().available()];
                         httpResponse.getEntity().getContent().read(buffer);
                     if(!httpResponse.getLastHeader("content-type").getValue().equals("image/jpg")) {
@@ -95,7 +92,6 @@ class HttpAsyncWorker extends Thread {
             httpClient.start();
             while (true) {
                 SimpleRequest request = requests.take();
-                System.out.println(request.getRequest().toString());
                 send(request);
             }
         } catch (InterruptedException ex){
