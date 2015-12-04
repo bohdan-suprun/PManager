@@ -22,21 +22,23 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by bod on 01.10.15.
  */
 public class HttpManager {
-    private final int THREAD_COUNT = 8;
-    public static final String HOST = "https://127.0.0.1";
-    private final String PATH = "/admin/";
+    private static int THREAD_COUNT = 8;
+    public static String HOST;
+    private static String PATH;
+    private static String IMAGE;
     private HttpAsyncWorker worker;
     private HttpClient uploader, fileUploader;
     private XMLParser[] parsers;
     private static HttpManager self;
+    static {
+        configurate();
+    }
 
     private HttpManager() {
         BasicCookieStore store = new BasicCookieStore();
@@ -50,6 +52,26 @@ public class HttpManager {
         for (int i = 0; i < THREAD_COUNT; i++) {
             parsers[i] = new XMLParser();
             parsers[i].start();
+        }
+    }
+
+    private static void configurate() {
+        try {
+            ResourceBundle rb = ResourceBundle.getBundle("config", new Locale("host"));
+            HOST = rb.getString("host");
+            PATH = rb.getString("manage");
+            IMAGE = rb.getString("image");
+            String thrcnt = rb.getString("thrcnt");
+            THREAD_COUNT = Integer.valueOf(thrcnt);
+            if (THREAD_COUNT < 1) {
+                THREAD_COUNT = 8;
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            HOST = "https://127.0.0.1";
+            PATH = "/admin/";
+            IMAGE = "/image/";
+            THREAD_COUNT = 8;
         }
     }
 
@@ -98,7 +120,7 @@ public class HttpManager {
     }
 
     public void getImage(String uri, ResponseListener performer){
-        uri = escapeUrl("/image/?action="+ Action.GET_IMAGE+"&"+uri);
+        uri = escapeUrl(IMAGE + "?action="+ Action.GET_IMAGE+"&"+uri);
         sendGet(HOST,uri,new Priority(4), performer);
     }
 
@@ -128,7 +150,7 @@ public class HttpManager {
     }
 
     public void sendFile(Image imageDesc, ResponseListener l){
-        HttpPost httpPost = new HttpPost(HOST + "/image/?action");
+        HttpPost httpPost = new HttpPost(HOST + IMAGE + "?action");
         HttpEntity httpEntity = MultipartEntityBuilder.create()
                 .addBinaryBody("file", new ByteArrayInputStream(imageDesc.getImage()),
                         ContentType.create("image/jpeg"), "image.jpg")
@@ -154,7 +176,7 @@ public class HttpManager {
 
     public void loadPreview(int imId, int albumId,ResponseListener li){
         String uri = "?action="+Action.GET_IMAGE+"&id="+imId+"&albumId="+albumId+"&preview=";
-        String url = escapeUrl(HOST+"/image/"+uri);
+        String url = escapeUrl(HOST + IMAGE + uri);
         HttpGet httpGet = new HttpGet(url);
         SimpleRequest request = new SimpleRequest(httpGet, new Priority(Priority.MIN), li);
         uploader.put(request);
