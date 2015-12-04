@@ -8,8 +8,6 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import java.util.HashMap;
-
 /**
  * Created by bod on 01.10.15.
  */
@@ -32,13 +30,13 @@ class MyParser extends DefaultHandler {
         }
         else if(result != null && result.isSuccess()){
             if(attributes.getLength() > 0) {
-                HashMap<String, String> pairs = new HashMap<String, String>();
-                for (int i = 0; i < attributes.getLength(); i++) {
-                    String atrValue = attributes.getValue(i);
-                    pairs.put(attributes.getQName(i), atrValue);
-                }
                 try {
-                    ((DBSelectResult)result).addResult(qName, pairs);
+                    for (int i = 0; i < attributes.getLength(); i++) {
+                        if (attributes.getQName(i).equals("code")) {
+                            ((DBSelectResult) result).addResult(qName, attributes.getValue(i));
+                            break;
+                        }
+                    }
                 } catch (UnknownTagNameException e) {
                     throw new SAXException("Unknown tag name: "+e.getMessage());
                 }
@@ -50,8 +48,7 @@ class MyParser extends DefaultHandler {
     public void endDocument() throws SAXException {
         if(listener != null) {
             XMLParser.notifyMe(result, listener);
-        }
-        else {
+        } else {
             XMLParser.notifyListeners(result);
         }
 
@@ -66,9 +63,11 @@ class MyParser extends DefaultHandler {
             result1 = new DBResult(action, status, text);
         }else{
             if(action >= 200 && action <= 299 || action == 1
-                    || action >= 100 && action <= 199)
+                    || action >= 100 && action <= 199) {
                 result1 = new DBSelectResult(action);
-            else result1 = new DBResult(action);
+            } else {
+                result1 = new DBResult(action);
+            }
         }
         return result1;
     }

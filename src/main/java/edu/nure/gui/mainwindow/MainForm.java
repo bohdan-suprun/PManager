@@ -34,6 +34,7 @@ import java.util.concurrent.CountDownLatch;
  * Created by bod on 08.09.15.
  */
 public class MainForm extends JFrame {
+    private static MainForm self;
     private JPanel panel1;
     private JTabbedPane propertiesTab;
     private JLabel userName;
@@ -52,7 +53,6 @@ public class MainForm extends JFrame {
     private JPanel searchByImage;
     private User worker;
     private DefaultListModel<OrderContainer> model;
-    private static MainForm self;
     private OrderRequester requester;
 
     public MainForm() {
@@ -98,6 +98,10 @@ public class MainForm extends JFrame {
             }
         });
         pack();
+    }
+
+    public static synchronized MainForm getMainForm() {
+        return (self == null) ? self = new MainForm() : self;
     }
 
     public JList getListOrder(){
@@ -224,14 +228,6 @@ public class MainForm extends JFrame {
         };
     }
 
-    public static synchronized MainForm getMainForm() {
-        return (self == null) ? self = new MainForm() : self;
-    }
-
-    public void setWorker(User worker) {
-        this.worker = worker;
-    }
-
     @Override
     public void setVisible(boolean b) {
         if (worker != null) {
@@ -251,6 +247,10 @@ public class MainForm extends JFrame {
         return worker;
     }
 
+    public void setWorker(User worker) {
+        this.worker = worker;
+    }
+
     private MouseAdapter searchByImage(){
         return new MouseAdapter() {
             @Override
@@ -262,7 +262,7 @@ public class MainForm extends JFrame {
                     byte[] buffer = new byte[in.available()];
                     in.read(buffer);
                     String hash = PHash.hash(buffer);
-                    HttpManager.getManager().getImage("hash="+hash+"&limit=2", lookLikesReceived());
+                    HttpManager.getManager().getImage("hash=" + hash + "&limit=1", lookLikesReceived());
                 } catch (IOException ex){
                     ex.printStackTrace();
                 }

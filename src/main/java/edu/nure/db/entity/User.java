@@ -1,21 +1,33 @@
 package edu.nure.db.entity;
 
+import edu.nure.db.dao.exceptions.DBException;
 import edu.nure.db.entity.constraints.ValidationException;
 import edu.nure.db.entity.constraints.Validator;
+import edu.nure.db.entity.primarykey.IntegerPrimaryKey;
+import edu.nure.db.entity.primarykey.PrimaryKey;
+import edu.nure.util.ResponseBuilder;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Objects;
 
 /**
  * Created by bod on 17.09.15.
  */
-public class User implements Transmittable{
+public class User extends AbstractEntity {
+
     public static final int ID_NOT_SET = -1;
+    private static final long serialVersionUID = 5222501006936056025L;
     private int id = ID_NOT_SET;
     private String phone;
     private String name;
     private String password;
     private String email;
     private Right right;
+
+    public User() {
+
+    }
 
     public User(int id, String name, String phone, String email, String password, Right right) throws ValidationException {
         this.id = id;
@@ -27,8 +39,16 @@ public class User implements Transmittable{
 
     }
 
-    public static String[] getFields() {
-        return new String[]{"Name", "Phone", "Email", "Right", "Password"};
+    public User(ResponseBuilder req) throws ValidationException {
+        String id = req.getParameter("id");
+        if (id != null)
+            setId(Integer.valueOf(id));
+        else setId(ID_NOT_SET);
+        setName(req.getParameter("name"));
+        setPhone(req.getParameter("phone"));
+        setEmail(req.getParameter("email"));
+        setPassword(req.getParameter("password"));
+        setRight(new Right(req.getParameter("right"), null));
     }
 
     public String getEmail() {
@@ -46,11 +66,25 @@ public class User implements Transmittable{
 
     }
 
+    @Override
+    public void parseResultSet(ResultSet result) throws DBException, ValidationException {
+        try {
+            setId(result.getInt("Id"));
+            setName(result.getString("Name"));
+            setPhone(result.getString("Phone"));
+            setEmail(result.getString("Email"));
+            setPassword(result.getString("Password"));
+            setRight(new Right(result.getString("Right"), null));
+        } catch (SQLException ex) {
+            throw new DBException(ex.getMessage());
+        }
+    }
+
     public int getId() {
         return id;
     }
 
-    public void setId(int id) {
+    private void setId(int id) {
         this.id = id;
     }
 
@@ -58,12 +92,12 @@ public class User implements Transmittable{
         return phone;
     }
 
-    public void setPhone(String phone) throws ValidationException {
+    private void setPhone(String phone) throws ValidationException {
         try {
             this.phone = Objects.requireNonNull(Validator.validate(phone, Validator.PHONE_VALIDATOR));
-        }catch (NullPointerException ex){
-                throw new ValidationException("Вы не казали номер телефона");
-        }catch (ValidationException ex){
+        } catch (NullPointerException ex) {
+            throw new ValidationException("Вы не казали номер телефона");
+        } catch (ValidationException ex) {
             throw new ValidationException("Номер телефона в неверном формате. Пример: +38(xxx) yyy-yy-yy");
         }
     }
@@ -72,12 +106,13 @@ public class User implements Transmittable{
         return name;
     }
 
-    public void setName(String name) throws ValidationException {
+    private void setName(String name) throws ValidationException {
         try {
-            this.name = Objects.requireNonNull(Validator.validate(name.replace('"', '\''), Validator.NAME_VALIDATOR));
-        } catch (NullPointerException ex){
+            this.name = Objects.requireNonNull(Validator.validate(name.replace('"', '\''), Validator.NAME_VALIDATOR))
+                    .replace("\'", "\"");
+        } catch (NullPointerException ex) {
             throw new ValidationException("Вы забыли указать имя");
-        } catch (ValidationException ex){
+        } catch (ValidationException ex) {
             throw new ValidationException("Имя должно состоять только из букв, может содержать символ '");
         }
     }
@@ -86,7 +121,7 @@ public class User implements Transmittable{
         return password;
     }
 
-    public void setPassword(String password) {
+    private void setPassword(String password) {
         this.password = password;
     }
 
@@ -94,25 +129,45 @@ public class User implements Transmittable{
         return right;
     }
 
-    public void setRight(Right right) {
+    private void setRight(Right right) {
         this.right = right;
     }
 
-    @Override
-    public String toXML() {
-        return "<user "+"id=\""+id+"\" name=\""+name.replace('"','\'')+"\""
-                +" phone=\""+phone+"\""
-                + ((email == null)?"":" email=\""+email.replace('"','\'')+"\"")
-                +" right=\""+right.getType()+"\"/>";
-    }
+//    @Override
+//    public String toXML() {
+//        return "<user " + "id=\"" + id + "\" name=\"" + name.replace('"', '\'') + "\""
+//                + " phone=\"" + phone + "\""
+//                + ((email == null) ? "" : " email=\"" + email.replace('"', '\'') + "\"")
+//                + " right=\"" + right.getType() + "\"/>";
+//    }
 
     @Override
     public String toQuery() {
         return "id=" + id +
                 "&phone=" + phone +
-                "&name=" + name  +
-                ((email == null)?"":"&email="+email.replace('"','\'')) +
+                "&name=" + name +
+                "&email=" + email +
                 "&right=" + right.getType();
     }
 
+    public String[] getFields() {
+        return new String[]{"Name", "Phone", "Email", "Right"};
+    }
+
+    @Override
+    public Object[] getValues() {
+        return new Object[]{
+                getName(), getPhone(), getEmail(), getRight().getType()
+        };
+    }
+
+    @Override
+    public String entityName() {
+        return "USER";
+    }
+
+    @Override
+    public PrimaryKey getPrimaryKey() {
+        return new IntegerPrimaryKey(getId());
+    }
 }

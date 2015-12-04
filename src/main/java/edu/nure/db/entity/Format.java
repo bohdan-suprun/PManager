@@ -1,30 +1,58 @@
 package edu.nure.db.entity;
 
+import edu.nure.db.dao.exceptions.DBException;
 import edu.nure.db.entity.constraints.MoreOrEq;
 import edu.nure.db.entity.constraints.ValidationException;
 import edu.nure.db.entity.constraints.Validator;
+import edu.nure.db.entity.primarykey.PrimaryKey;
+import edu.nure.db.entity.primarykey.StringPrimaryKey;
+import edu.nure.util.ResponseBuilder;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 /**
  * Created by bod on 17.09.15.
  */
-public class Format implements Transmittable {
+public class Format extends AbstractEntity {
+    private static final long serialVersionUID = 7601744666950958130L;
     private String name;
     private int width, height;
-    private float price;
+    private double price;
 
-    public Format(String name, int width, int height, float price) throws ValidationException {
+    public Format() {
+
+    }
+
+    public Format(String name, int width, int height, double price) throws ValidationException {
+        setName(name);
+        setHeight(height);
+        setWidth(width);
+        setPrice(price);
+    }
+
+    public Format(ResponseBuilder req) throws ValidationException {
+        setName(req.getParameter("name"));
         try {
-            setName(name);
-            setHeight(height);
-            setWidth(width);
-            setPrice(price);
-        } catch (Exception ex){
-            throw new ValidationException(ex.getMessage());
+            setHeight(req.getIntParameter("height"));
+            setWidth(req.getIntParameter("width"));
+            setPrice(req.getDoubleParameter("price"));
+        } catch (NumberFormatException ex) {
+            throw new ValidationException();
         }
     }
 
-    public static String[] getFields() {
-        return new String[]{"Name", "Width", "Height", "Price"};
+    public void parseResultSet(ResultSet rs) throws DBException, ValidationException {
+        try {
+            setName(rs.getString("Name"));
+            setHeight(rs.getInt("Height"));
+            setWidth(rs.getInt("Width"));
+            setPrice(rs.getDouble("Price"));
+
+        } catch (SQLException ex) {
+            throw new DBException(ex.getMessage());
+        }
+
     }
 
     public String getName() {
@@ -32,7 +60,7 @@ public class Format implements Transmittable {
     }
 
     public void setName(String name) {
-        this.name = name.replace('\'','"');
+        this.name = name.replace('\'', '"');
     }
 
     public int getWidth() {
@@ -40,7 +68,7 @@ public class Format implements Transmittable {
     }
 
     public void setWidth(int width) throws ValidationException {
-        this.width = (Integer)Validator.validate(width, new MoreOrEq<Integer>(1));
+        this.width = (Integer) Validator.validate(width, new MoreOrEq<Integer>(1));
     }
 
     public int getHeight() {
@@ -48,30 +76,62 @@ public class Format implements Transmittable {
     }
 
     public void setHeight(int height) throws ValidationException {
-        this.height = this.width = (Integer)Validator.validate(height, new MoreOrEq<Integer>(1));
+        this.height = this.width = (Integer) Validator.validate(height, new MoreOrEq<Integer>(1));
     }
 
-    public float getPrice() {
+    public double getPrice() {
         return price;
     }
 
-    public void setPrice(float price) throws ValidationException {
-        this.price = (Float)Validator.validate(price, new MoreOrEq<Float>(0.0f));
+    public void setPrice(double price) throws ValidationException {
+        this.price = (Double) Validator.validate(price, new MoreOrEq<Double>(0.0));
     }
 
-    @Override
-    public String toXML() {
-        return "<format name=\""+name.replace('"','\'')+"\" "+
-                "width=\""+width+"\" "+
-                "height=\""+height+"\" "+
-                "price=\""+price+"\"/>";
-    }
+//
+//    @Override
+//    public String toXML() {
+//        return "<format name=\"" + name.replace('"', '\'') + "\" " +
+//                "width=\"" + width + "\" " +
+//                "height=\"" + height + "\" " +
+//                "price=\"" + price + "\"/>";
+//    }
 
     @Override
     public String toQuery() {
-        return "name=" + name.replace('"','\'') +
+        return "name=" + name.replace('"', '\'') +
                 "&width=" + width +
                 "&height=" + height +
                 "&price=" + price;
+    }
+
+    /*
+        public static Format getFormatByName(String name)throws ConnectException, SQLException, ValidationException{
+            ResultSet rs = Connector.getConnector().getConnection().createStatement().
+                    executeQuery(RequestPreparing.select("format", new String[]{"*"}, "WHERE Name = '" + name+"'"));
+            return new Format(rs);
+        }
+        */
+    public String[] getFields() {
+        return new String[]{"Name", "Width", "Height", "Price"};
+    }
+
+    @Override
+    public Object[] getValues() {
+        return new Object[]{
+                getName(),
+                getWidth(),
+                getHeight(),
+                getPrice()
+        };
+    }
+
+    @Override
+    public String entityName() {
+        return "FORMAT";
+    }
+
+    @Override
+    public PrimaryKey getPrimaryKey() {
+        return new StringPrimaryKey("Name", getName());
     }
 }

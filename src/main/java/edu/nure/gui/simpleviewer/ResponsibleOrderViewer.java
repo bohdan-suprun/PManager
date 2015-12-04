@@ -13,7 +13,6 @@ import edu.nure.net.Priority;
 
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.text.SimpleDateFormat;
 
 /**
  * Created by bod on 15.10.15.
